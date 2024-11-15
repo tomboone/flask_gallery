@@ -1,11 +1,8 @@
 """extensions"""
+from flask_login import LoginManager  # type: ignore
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
 
+db = SQLAlchemy(model_class=DeclarativeBase)
 
-class Base(DeclarativeBase):  # pylint: disable=too-few-public-methods
-    """Base class for all models"""
-    pass  # pylint: disable=unnecessary-pass
-
-
-db = SQLAlchemy(model_class=Base)
+login_manager = LoginManager()

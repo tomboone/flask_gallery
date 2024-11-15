@@ -1,7 +1,9 @@
 """Gallery views"""
-from flask import Blueprint, render_template
-from app import db
-from app.models.gallery import Gallery
+from flask import Blueprint, render_template, flash
+from flask_login import login_required  # type: ignore
+from app.forms.login import LoginForm
+from app.controllers.gallery_controller import GalleryController
+from app.controllers.user_controller import UserController
 
 bp = Blueprint('gallery', __name__)
 
@@ -9,11 +11,26 @@ bp = Blueprint('gallery', __name__)
 @bp.route('/')
 def index():
     """Gallery index"""
-    galleries = db.session.execute(db.select(Gallery)).scalars()
-    return render_template('gallery/index.html', galleries=galleries)
+    return render_template(
+        'gallery/index.html',
+        galleries=GalleryController.get_all_galleries()
+    )
+
+
+@bp.route('/login', methods=['GET', 'POST'])
+def login():
+    """Login page"""
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = UserController.user_login(form.email.data, form.password.data)
+        if user:
+            return 'Login successful'
+        flash('Invalid email or password', 'error')
+    return render_template('login.html', form=form)
 
 
 @bp.route('/new-gallery')
+@login_required
 def c_gallery():
     """Create gallery"""
     return 'New gallery'
