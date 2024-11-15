@@ -13,10 +13,10 @@ class Album(Base):  # pylint: disable=too-few-public-methods
     name: Mapped[str] = mapped_column(String(64), unique=True)
     description: Mapped[str] = mapped_column(String(140))
     gallery_id: Mapped[int] = mapped_column(ForeignKey('gallery.id'))
-    gallery: Mapped["Gallery"] = relationship(  # noqa: F821
+    gallery: Mapped["Gallery"] = relationship(  # type: ignore # noqa: F821
         back_populates='albums'
     )
-    images: Mapped[List["Image"]] = relationship(  # noqa: F821
+    images: Mapped[List["Image"]] = relationship(  # type: ignore # noqa: F821
         back_populates='album'
     )
 

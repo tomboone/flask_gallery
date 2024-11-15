@@ -12,7 +12,7 @@ class Gallery(Base):  # pylint: disable=too-few-public-methods
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(64), unique=True)
     description: Mapped[str] = mapped_column(String(140))
-    albums: Mapped[List["Album"]] = relationship(  # noqa: F821
+    albums: Mapped[List["Album"]] = relationship(  # type: ignore # noqa: F821
         back_populates='gallery'
     )
 

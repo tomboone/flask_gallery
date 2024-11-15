@@ -12,7 +12,7 @@ class Image(Base):  # pylint: disable=too-few-public-methods
     name: Mapped[str] = mapped_column(String(64), unique=True)
     description: Mapped[str] = mapped_column(String(140))
     album_id: Mapped[int] = mapped_column(ForeignKey('album.id'))
-    album: Mapped["Album"] = relationship(  # noqa: F821
+    album: Mapped["Album"] = relationship(  # type: ignore # noqa: F821
         back_populates='images'
     )
 
