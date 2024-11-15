@@ -1,0 +1,14 @@
+#file: noinspection UndefinedAction
+name: pylint
+on: [ push ]
+jobs:
+  pylint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          # noinspection UndefinedParamsPresent
+          python-version: '3.12'
+      - run: pip install -r requirements.txt  # install requirements to enable GitHub run tests
+      - run: pylint --rcfile=.pylintrc app/  # run pylint on the app directory
