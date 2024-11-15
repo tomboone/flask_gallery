@@ -1,8 +1,8 @@
 #file: noinspection UndefinedAction
-name: mypy
+name: flake8
 on: [ push ]
 jobs:
-  mypy:
+  flake8:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -11,4 +11,4 @@ jobs:
           # noinspection UndefinedParamsPresent
           python-version: '3.12'
       - run: pip install -r requirements.txt  # install requirements to enable GitHub run tests
-      - run: mypy app/  # run mypy on the app directory
+      - run: flake8 app/  # run pylint on the app directory
