@@ -1,18 +1,24 @@
 """album"""
 from typing import List
-from sqlalchemy import String, Integer, ForeignKey
+from sqlalchemy import String, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from app.extensions import db
-from app.models.image import Image
+from app.extensions import Base
 
 
-class Album(db.Model):  # pylint: disable=too-few-public-methods
+# noinspection PyUnresolvedReferences
+class Album(Base):  # pylint: disable=too-few-public-methods
     """Album model"""
+    __tablename__ = 'album'
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(64), unique=True)
     description: Mapped[str] = mapped_column(String(140))
-    gallery: Mapped[int] = mapped_column(Integer, ForeignKey('gallery.id'))
-    images: Mapped[List['Image']] = relationship(back_populates='album')
+    gallery_id: Mapped[int] = mapped_column(ForeignKey('gallery.id'))
+    gallery: Mapped["Gallery"] = relationship(  # noqa: F821
+        back_populates='albums'
+    )
+    images: Mapped[List["Image"]] = relationship(  # noqa: F821
+        back_populates='album'
+    )
 
     def __repr__(self):
         return f'<Album {self.name}>'

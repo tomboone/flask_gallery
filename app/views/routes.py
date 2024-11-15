@@ -1,5 +1,7 @@
 """Gallery views"""
-from flask import Blueprint
+from flask import Blueprint, render_template
+from app import db
+from app.models.gallery import Gallery
 
 bp = Blueprint('gallery', __name__)
 
@@ -7,7 +9,8 @@ bp = Blueprint('gallery', __name__)
 @bp.route('/')
 def index():
     """Gallery index"""
-    return 'Gallery index'
+    galleries = db.session.execute(db.select(Gallery)).scalars()
+    return render_template('gallery/index.html', galleries=galleries)
 
 
 @bp.route('/new-gallery')
