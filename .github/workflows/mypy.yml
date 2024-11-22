@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: install MariaDB client library
-        run: apt install libmariadb3 libmariadb-dev
+        run: sudo apt install libmariadb3 libmariadb-dev
 
       - name: Check out the repository
         uses: actions/checkout@v4
