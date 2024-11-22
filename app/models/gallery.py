@@ -20,5 +20,19 @@ class Gallery(Model):  # pylint: disable=too-few-public-methods
         back_populates='gallery'
     )
 
+    def __init__(self, name, description):
+        self.name = name
+        self.description = description
+
     def __repr__(self):
         return f'<Gallery {self.name}>'
+
+    @staticmethod
+    def get_all_galleries():
+        """ Get all galleries """
+        return db.session.execute(db.select(Gallery)).scalars().all()
+
+    @staticmethod
+    def get_gallery(gallery_id):
+        """ Get gallery """
+        return db.session.execute(db.select(Gallery).filter_by(id=gallery_id)).scalar_one_or_none()
