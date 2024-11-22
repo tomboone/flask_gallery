@@ -1,14 +1,25 @@
-#file: noinspection UndefinedAction
+#file: noinspection UndefinedAction,UndefinedParamsPresent
 name: pylint
+
 on: [ push ]
+
 jobs:
   pylint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: install MariaDB client library
+        run: apt install libmariadb3 libmariadb-dev
+
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
         with:
-          # noinspection UndefinedParamsPresent
           python-version: '3.12'
-      - run: pip install -r requirements.txt  # install requirements to enable GitHub run tests
-      - run: pylint --rcfile=.pylintrc app/  # run pylint on the app directory
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run pylint
+        run: pylint app/
