@@ -4,7 +4,6 @@ services:
     container_name: flask_gallery
     volumes:
       - .:/app
-      - ~/.gitconfig:/root/.gitconfig
     working_dir: /app
     labels:
       - "traefik.enable=true"
@@ -12,12 +11,9 @@ services:
       - "traefik.http.routers.flask_gallery.tls=true"
       - "traefik.http.routers.flask_gallery.entrypoints=websecure"
     environment:
-      SSH_AUTH_SOCK: /run/secrets/user_ssh_key
       SECRET_KEY: "thisisasecretkey"
       SQLALCHEMY_DATABASE_URI: "mariadb+mariadbconnector://user:password@flask_gallery_db:3306/mydb"
       SITE_NAME: "Flask Gallery"
-    secrets:
-      - user_ssh_key
     depends_on:
       - flask_gallery_db
     networks:
@@ -37,10 +33,6 @@ services:
       - mysql-data:/var/lib/mysql
     networks:
       - proxy
-
-secrets:
-  user_ssh_key:
-    file: ${USER_SSH_KEY}
 
 volumes:
     mysql-data:
