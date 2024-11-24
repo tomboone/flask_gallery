@@ -26,3 +26,8 @@ class Album(Model):  # pylint: disable=too-few-public-methods
 
     def __repr__(self):
         return f'<Album {self.name}>'
+
+    @staticmethod
+    def get_album(album_id):
+        """ Get album """
+        return db.session.execute(db.select(Album).filter_by(id=album_id)).scalar_one_or_none()

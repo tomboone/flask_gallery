@@ -30,7 +30,7 @@ class Gallery(Model):  # pylint: disable=too-few-public-methods
     @staticmethod
     def get_all_galleries():
         """ Get all galleries """
-        return db.session.execute(db.select(Gallery)).scalars().all()
+        return db.session.execute(db.select(Gallery).order_by(Gallery.name)).scalars().all()
 
     @staticmethod
     def get_gallery(gallery_id):
