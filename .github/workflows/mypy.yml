@@ -5,7 +5,7 @@ on: push
 
 jobs:
   mypy:
-    runs-on: python:3.12-slim
+    runs-on: ubuntu-latest
 
     steps:
     - name: Install mariadb dependencies
