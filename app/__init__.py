@@ -1,6 +1,6 @@
 """Flask application factory"""
 import click
-from flask import Flask, redirect, url_for
+from flask import Flask, redirect, url_for, render_template
 from flask.cli import FlaskGroup, with_appcontext
 from app.extensions import db, login_manager
 from config import Config
@@ -30,16 +30,14 @@ def create_app(config_class=Config) -> Flask:
         """
         return redirect(url_for('user.login'))
 
-    with application.app_context():
-        db.create_all()
-
     # Register blueprints here
-    from app.gallery.routes import bp as gallery_bp
+    from app.gallery import bp as gallery_bp
     application.register_blueprint(gallery_bp)
 
-    from app.user.routes import bp as user_bp
+    from app.user import bp as user_bp
     application.register_blueprint(user_bp)
 
+    application.cli.add_command(initdb)
     application.cli.add_command(createuser)
 
     @application.shell_context_processor
@@ -47,10 +45,25 @@ def create_app(config_class=Config) -> Flask:
         """ Shell context """
         return {'app': application, 'db': db}
 
+    @application.errorhandler(404)
+    def page_not_found(e):
+        """404 error handler
+        """
+        return render_template('404.html', e=e), 404
+
     return application
 
 
 cli = FlaskGroup(create_app=create_app)
+
+
+@cli.command(name='initdb')
+@with_appcontext
+def initdb():
+    """Initialize the database
+    """
+    db.create_all()
+    print('Database initialized')
 
 
 @cli.command(name='createuser')

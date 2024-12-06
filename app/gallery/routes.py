@@ -1,10 +1,11 @@
 """
 Gallery routes
 """
-from flask import Blueprint, render_template, flash, redirect, url_for, request
+from flask import Blueprint, render_template, flash, redirect, url_for, request, abort
 from flask_login import login_required  # type: ignore
+from slugify import slugify  # type: ignore
 from app.extensions import db
-from app.forms.album_form import AlbumForm  # type: ignore
+from app.forms.album_form import AlbumForm
 from app.forms.gallery_form import GalleryForm
 from app.models.album import Album
 from app.models.gallery import Gallery
@@ -37,12 +38,16 @@ def c_gallery():
     form = GalleryForm()  # create form instance
 
     if form.validate_on_submit():  # if form is submitted
+
         gallery = Gallery(  # create gallery
-            form.name.data,
-            form.description.data
+            name=form.name.data,
+            slug=slugify(form.name.data),
+            description=form.description.data
         )
+
         db.session.add(gallery)
         db.session.commit()
+
         flash(  # flash message
             'Gallery created',
             'success'
@@ -50,6 +55,7 @@ def c_gallery():
         return redirect(  # redirect to gallery index
             url_for('gallery.index')
         )
+
     return render_template(  # render new gallery form
         'gallery/gallery/form.html',
         form=form,
@@ -57,25 +63,20 @@ def c_gallery():
     )
 
 
-@bp.route('/gallery-<gallery_id>')
-def r_gallery(gallery_id):
+@bp.route('/<gallery_slug>')
+def r_gallery(gallery_slug):
     """
     Read gallery/Albums index
 
-    :param gallery_id: gallery id
+    :param gallery_slug: gallery slug
 
     :return: gallery
     """
-    gallery = Gallery.get_gallery(gallery_id)  # get gallery
+    gallery = Gallery.get_gallery_by_slug(gallery_slug)  # get gallery
 
-    if not gallery:  # if gallery not found
-        flash(  # flash message
-            'Gallery not found',
-            'danger'
-        )
-        return redirect(  # redirect to gallery index
-            url_for('gallery.index')
-        )
+    if gallery is None:  # if gallery not found
+
+        abort(404)  # abort
 
     return render_template(  # render gallery
         'gallery/gallery/index.html',  # template
@@ -84,32 +85,28 @@ def r_gallery(gallery_id):
     )
 
 
-@bp.route('/gallery-<gallery_id>/edit')
+@bp.route('/<gallery_slug>/edit')
 @login_required
-def u_gallery(gallery_id):
+def u_gallery(gallery_slug):
     """
     Update gallery
 
-    :param gallery_id: gallery id
+    :param gallery_slug: gallery slug
 
     :return: edit gallery form
     """
-    gallery = Gallery.get_gallery(gallery_id)  # get gallery
+    gallery = Gallery.get_gallery_by_slug(gallery_slug)  # get gallery
 
-    if not gallery:  # if gallery not found
-        flash(  # flash message
-            'Gallery not found',
-            'danger'
-        )
-        return redirect(  # redirect to gallery index
-            url_for('gallery.index')
-        )
+    if gallery is None:  # if gallery not found
+
+        abort(404)  # abort
 
     form = GalleryForm(obj=gallery)  # create form instance
 
     if form.validate_on_submit():  # if form is submitted, update gallery
 
         gallery.name = form.name.data  # name
+        gallery.slug = slugify(form.name.data)  # slug
         gallery.description = form.description.data  # description
 
         db.session.commit()  # commit changes
@@ -122,7 +119,7 @@ def u_gallery(gallery_id):
         return redirect(  # redirect to gallery
             url_for(
                 'gallery.r_gallery',
-                gallery_id=gallery_id
+                gallery_slug=gallery_slug
             )
         )
 
@@ -134,28 +131,24 @@ def u_gallery(gallery_id):
     )
 
 
-@bp.route('/gallery-<gallery_id>/delete', methods=['GET', 'POST'])
+@bp.route('/<gallery_slug>/delete', methods=['GET', 'POST'])
 @login_required
-def d_gallery(gallery_id):
+def d_gallery(gallery_slug):
     """
     Delete gallery
 
-    :param gallery_id: gallery id
+    :param gallery_slug: gallery slug
 
     :return: delete gallery
     """
-    gallery = Gallery.get_gallery(gallery_id)  # get gallery
+    gallery = Gallery.get_gallery_by_slug(gallery_slug)  # get gallery
 
-    if not gallery:  # if gallery not found
-        flash(  # flash message
-            'Gallery not found',
-            'danger'
-        )
-        return redirect(  # redirect to gallery index
-            url_for('gallery.index')
-        )
+    if gallery is None:  # if gallery not found
+
+        abort(404)  # abort
 
     if request.method == 'POST':  # if form is submitted
+
         db.session.delete(gallery)
         db.session.commit()
 
@@ -175,27 +168,21 @@ def d_gallery(gallery_id):
     )
 
 
-@bp.route('/gallery-<gallery_id>/new-album', methods=['GET', 'POST'])
+@bp.route('/<gallery_slug>/new-album', methods=['GET', 'POST'])
 @login_required
-def c_album(gallery_id):
+def c_album(gallery_slug):
     """
     Create album
 
-    :param gallery_id: gallery id
+    :param gallery_slug: gallery slug
 
     :return: new album form
     """
-    gallery = Gallery.get_gallery(gallery_id)  # get gallery
+    gallery = Gallery.get_gallery_by_slug(gallery_slug)  # get gallery
 
-    if not gallery:  # if gallery not found
+    if gallery is None:  # if gallery not found
 
-        flash(  # flash message
-            'Gallery not found',
-            'danger'
-        )
-        return redirect(  # redirect to gallery index
-            url_for('gallery.index')
-        )
+        abort(404)  # abort
 
     form = AlbumForm()  # create form instance
 
@@ -203,8 +190,9 @@ def c_album(gallery_id):
 
         album = Album(  # create album
             name=form.name.data,  # title
+            slug=slugify(form.name.data),  # slug
             description=form.description.data,  # description
-            gallery_id=gallery_id  # gallery id
+            gallery_id=gallery.id  # gallery id
         )
 
         db.session.add(album)  # add album
@@ -215,10 +203,10 @@ def c_album(gallery_id):
             'success'
         )
 
-        return redirect(  # redirect to gallery
+        return redirect(  # redirect to album
             url_for(
-                'gallery.r_gallery',
-                gallery_id=gallery_id)
+                'gallery.r_album',
+                album_slug=album.slug)
         )
 
     return render_template(  # render new album form
@@ -229,31 +217,25 @@ def c_album(gallery_id):
     )
 
 
-@bp.route('/gallery-<gallery_id>/album-<album_id>')
-def r_album(gallery_id, album_id):
+@bp.route('/<gallery_slug>/<album_slug>')
+def r_album(gallery_slug, album_slug):
     """
     Read album/Images index
 
-    :param gallery_id: gallery id
-    :param album_id: album id
+    :param gallery_slug: gallery slug
+    :param album_slug: album slug
 
     :return: album
     """
-    album = Album.get_album(album_id)  # get album
+    album = Album.get_album_by_slug(album_slug)  # get album
+    gallery = Gallery.get_gallery(gallery_slug)  # get gallery
 
-    if not album:  # if album not found
-        flash(  # flash message
-            'Album not found',
-            'danger'
-        )
-        return redirect(  # redirect to gallery
-            url_for(
-                'gallery.r_gallery',
-                gallery_id=gallery_id
-            )
-        )
-
-    gallery = Gallery.get_gallery(album.gallery_id)  # get gallery
+    if (  # if...
+            gallery is None or  # ...gallery is None
+            album is None or  # ...album is None
+            album.gallery_id != gallery.id  # ...album does not belong to gallery
+    ):
+        abort(404)  # abort
 
     return render_template(  # render album
         'gallery/album/index.html',  # template
@@ -263,38 +245,35 @@ def r_album(gallery_id, album_id):
     )
 
 
-@bp.route('/gallery-<gallery_id>/album-<album_id>/edit', methods=['GET', 'POST'])
+@bp.route('/<gallery_slug>/<album_slug>/edit', methods=['GET', 'POST'])
 @login_required
-def u_album(gallery_id, album_id):
+def u_album(gallery_slug, album_slug):
     """
     Update album
 
-    :param gallery_id: gallery id
-    :param album_id: album id
+    :param gallery_slug: gallery slug
+    :param album_slug: album slug
 
     :return: edit album form
     """
-    album = Album.get_album(album_id)  # get album
+    album = Album.get_album_by_slug(album_slug)  # get album
 
-    if not album:  # if album not found
-        flash(  # flash message
-            'Album not found',
-            'danger'
-        )
-        return redirect(  # redirect to gallery
-            url_for(
-                'gallery.r_gallery',
-                gallery_id=gallery_id
-            )
-        )
+    gallery = Gallery.get_gallery_by_slug(gallery_slug)  # get gallery
 
-    gallery = Gallery.get_gallery(album.gallery_id)  # get gallery
+    if (  # if...
+            album is None or   # ...album is None
+            gallery is None or  # ...gallery is None
+            album.gallery_id != gallery.id  # ...album does not belong to gallery
+    ):
+        abort(404)  # abort
 
     form = AlbumForm(obj=album)  # create form instance
 
     if form.validate_on_submit():  # if form is submitted, update album
-        album.name = form.name.data
-        album.description = form.description.data
+
+        album.name = form.name.data  # name
+        album.slug = slugify(form.name.data)  # slug
+        album.description = form.description.data  # description
 
         db.session.commit()  # commit changes
 
@@ -306,8 +285,8 @@ def u_album(gallery_id, album_id):
         return redirect(  # redirect to album
             url_for(
                 'gallery.r_album',
-                gallery_id=gallery_id,
-                album_id=album_id
+                gallery_slug=gallery_slug,
+                album_slug=album_slug
             )
         )
 
@@ -320,37 +299,32 @@ def u_album(gallery_id, album_id):
     )
 
 
-@bp.route('/gallery-<gallery_id>/album-<album_id>/delete', methods=['GET', 'POST'])
+@bp.route('/<gallery_slug>/<album_slug>/delete', methods=['GET', 'POST'])
 @login_required
-def d_album(gallery_id, album_id):
+def d_album(gallery_slug, album_slug):
     """
     Delete album
 
-    :param gallery_id: gallery id
-    :param album_id: album id
+    :param gallery_slug: gallery slug
+    :param album_slug: album slug
 
     :return: delete album
     """
-    album = Album.get_album(album_id)  # get album
+    album = Album.get_album_by_slug(album_slug)  # get album
 
-    if not album:  # if album not found
-        flash(  # flash message
-            'Album not found',
-            'danger'
-        )
+    gallery = Gallery.get_gallery_by_slug(gallery_slug)  # get gallery
 
-        return redirect(  # redirect to gallery
-            url_for(
-                'gallery.r_gallery',
-                gallery_id=gallery_id
-            )
-        )
-
-    gallery = Gallery.get_gallery(album.gallery_id)  # get gallery
+    if (  # if...
+            album is None or  # ...album is None
+            gallery is None or  # ...gallery is None
+            album.gallery_id != gallery.id  # ...album does not belong to gallery
+    ):
+        abort(404)  # abort
 
     if request.method == 'POST':  # if form is submitted
-        db.session.delete(album)
-        db.session.commit()
+
+        db.session.delete(album)  # delete album
+        db.session.commit()  # commit changes
 
         flash(  # flash message
             'Album deleted',
@@ -360,7 +334,7 @@ def d_album(gallery_id, album_id):
         return redirect(  # redirect to gallery
             url_for(
                 'gallery.r_gallery',
-                gallery_id=gallery_id
+                gallery_slug=gallery_slug
             )
         )
 
@@ -372,32 +346,32 @@ def d_album(gallery_id, album_id):
     )
 
 
-@bp.route('/gallery-<gallery_id>/album-<album_id>/new-image', methods=['GET', 'POST'])
+@bp.route('/<gallery_slug>/<album_slug>/new-image', methods=['GET', 'POST'])
 @login_required
-def c_image(gallery_id, album_id):
+def c_image(gallery_slug, album_slug):
     """
     Create image
 
-    :param gallery_id: gallery id
-    :param album_id: album id
+    :param gallery_slug: gallery slug
+    :param album_slug: album slug
 
     :return: new image form
     """
-    return f'New image in gallery {gallery_id}, album {album_id}'
+    return f'New image in gallery {gallery_slug}, album {album_slug}'
 
 
-@bp.route('/gallery-<gallery_id>/album-<album_id>/image-<image_id>')
-def r_image(gallery_id, album_id, image_id):
+@bp.route('/<gallery_slug>/<album_slug>/<file_name>')
+def r_image(gallery_slug, album_slug, file_name):
     """
     Read image
 
-    :param gallery_id: gallery id
-    :param album_id: album id
-    :param image_id: image id
+    :param gallery_slug: gallery slug
+    :param album_slug: album slug
+    :param file_name: file name
 
     :return: image
     """
-    return f'Gallery {gallery_id}, Album {album_id}, Image {image_id}'
+    return f'Gallery {gallery_slug}, Album {album_slug}, Image {file_name}'
 
 
 @bp.route('/gallery-<gallery_id>/album-<album_id>/image-<image_id>/edit', methods=['GET', 'POST'])

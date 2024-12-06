@@ -14,6 +14,9 @@ services:
       SECRET_KEY: "thisisasecretkey"
       SQLALCHEMY_DATABASE_URI: "mariadb+mariadbconnector://user:password@flask_gallery_db:3306/mydb"
       SITE_NAME: "Flask Gallery"
+    secrets:
+      - ssh_key
+      - gitconfig
     depends_on:
       - flask_gallery_db
     networks:
@@ -33,6 +36,12 @@ services:
       - mysql-data:/var/lib/mysql
     networks:
       - proxy
+
+secrets:
+  ssh_key:
+    file: ${SSH_KEY_FILE}
+  gitconfig:
+    file: ${GITCONFIG}
 
 volumes:
     mysql-data:

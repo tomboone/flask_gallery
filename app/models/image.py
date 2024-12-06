@@ -14,6 +14,7 @@ else:
 class Image(Model):  # pylint: disable=too-few-public-methods
     """Image model"""
     id: Mapped[int] = mapped_column(primary_key=True)
+    file_name: Mapped[str] = mapped_column(String(64), unique=True)
     caption: Mapped[str] = mapped_column(String(2200))
     album_id: Mapped[int] = mapped_column(ForeignKey('album.id'))
     album: Mapped["Album"] = relationship(  # type: ignore # noqa: F821
