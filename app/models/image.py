@@ -1,6 +1,7 @@
 """image"""
 from typing import TYPE_CHECKING
 from sqlalchemy import String, ForeignKey
+from sqlalchemy.dialects.mysql import LONGTEXT
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.extensions import db
 
@@ -14,8 +15,8 @@ else:
 class Image(Model):  # pylint: disable=too-few-public-methods
     """Image model"""
     id: Mapped[int] = mapped_column(primary_key=True)
-    file_name: Mapped[str] = mapped_column(String(64), unique=True)
-    caption: Mapped[str] = mapped_column(String(2200))
+    file_name: Mapped[str] = mapped_column(String(255), unique=True)
+    caption: Mapped[str] = mapped_column(LONGTEXT)
     album_id: Mapped[int] = mapped_column(ForeignKey('album.id'))
     album: Mapped["Album"] = relationship(  # type: ignore # noqa: F821
         back_populates='images'

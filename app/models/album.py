@@ -1,6 +1,7 @@
 """album"""
 from typing import List, TYPE_CHECKING
 from sqlalchemy import String, ForeignKey
+from sqlalchemy.dialects.mysql import LONGTEXT
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.extensions import db
 
@@ -14,9 +15,9 @@ else:
 class Album(Model):  # pylint: disable=too-few-public-methods
     """Album model"""
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(String(64), unique=True)
-    slug: Mapped[str] = mapped_column(String(64), unique=True)
-    description: Mapped[str] = mapped_column(String(140))
+    name: Mapped[str] = mapped_column(String(255), unique=True)
+    slug: Mapped[str] = mapped_column(String(255), unique=True)
+    description: Mapped[str] = mapped_column(LONGTEXT)
     gallery_id: Mapped[int] = mapped_column(ForeignKey('gallery.id'))
     gallery: Mapped["Gallery"] = relationship(  # type: ignore # noqa: F821
         back_populates='albums'

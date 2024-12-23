@@ -206,6 +206,7 @@ def c_album(gallery_slug):
         return redirect(  # redirect to album
             url_for(
                 'gallery.r_album',
+                gallery_slug=gallery.slug,
                 album_slug=album.slug)
         )
 
@@ -228,7 +229,7 @@ def r_album(gallery_slug, album_slug):
     :return: album
     """
     album = Album.get_album_by_slug(album_slug)  # get album
-    gallery = Gallery.get_gallery(gallery_slug)  # get gallery
+    gallery = Gallery.get_gallery_by_slug(gallery_slug)  # get gallery
 
     if (  # if...
             gallery is None or  # ...gallery is None
@@ -286,7 +287,7 @@ def u_album(gallery_slug, album_slug):
             url_for(
                 'gallery.r_album',
                 gallery_slug=gallery_slug,
-                album_slug=album_slug
+                album_slug=album.slug
             )
         )
 
