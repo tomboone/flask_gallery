@@ -1,49 +1,44 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('gallery.index') }}">Home</a></li>
-            {% if gallery is defined %}
-                <li class="breadcrumb-item"><a href="{{ url_for('gallery.r_gallery', gallery_id=gallery.id) }}">{{ gallery.name }}</a></li>
-            {% endif %}
-            <li class="breadcrumb-item active" aria-current="page">
+    <div class="container">
+        <nav class="row justify-content-md-center" aria-label="breadcrumb">
+            <ol class="breadcrumb col-auto">
+                <li class="breadcrumb-item"><a href="{{ url_for('gallery.index') }}">Photos</a></li>
                 {% if gallery is defined %}
-                    Edit
-                {% else %}
-                    Add
+                    <li class="breadcrumb-item"><a href="{{ url_for('gallery.r_gallery', gallery_slug=gallery.slug) }}">{{ gallery.name }}</a></li>
                 {% endif %}
-            </li>
-        </ol>
-    </nav>
-    {% if gallery is defined %}
-       <h1>Edit {{ gallery.name }}</h1>
-    {% else %}
-        <h1>{{ title }}</h1>
-    {% endif %}
-    <form method="post">
-        {{ form.csrf_token }}
-        <div class="mb-3">
-            {{ form.name.label(class="form-label") }}
-            {{ form.name(class="form-control") }}
-            {% if form.name.errors %}
-                <div class="alert alert-danger" role="alert">
-                    {{ form.name.errors|join(', ') }}
-                </div>
-            {% endif %}
-        </div>
-        <div class="mb-3">
-            {{ form.description.label(class="form-label") }}
-            {{ form.description(class="form-control") }}
-            {% if form.description.errors %}
-                <div class="alert alert-danger" role="alert">
-                    {{ form.description.errors|join(', ') }}
-                </div>
-            {% endif %}
-        </div>
-        <button type="submit" class="btn btn-primary">Save</button>
+            </ol>
+        </nav>
         {% if gallery is defined %}
-            <a href="{{ url_for('gallery.r_gallery', gallery_id=gallery.id) }}" class="btn btn-secondary">Cancel</a>
+           <h1 class="mt-4 mb-5 row justify-content-md-center">Edit {{ gallery.name }}</h1>
+        {% else %}
+            <h1>{{ title }}</h1>
         {% endif %}
-    </form>
+        <form method="post">
+            {{ form.csrf_token }}
+            <div class="mb-3">
+                {{ form.name.label(class="form-label") }}
+                {{ form.name(class="form-control") }}
+                {% if form.name.errors %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ form.name.errors|join(', ') }}
+                    </div>
+                {% endif %}
+            </div>
+            <div class="mb-3">
+                {{ form.description.label(class="form-label") }}
+                {{ form.description(class="form-control") }}
+                {% if form.description.errors %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ form.description.errors|join(', ') }}
+                    </div>
+                {% endif %}
+            </div>
+            <button type="submit" class="btn btn-primary">Save</button>
+            {% if gallery is defined %}
+                <a href="{{ url_for('gallery.r_gallery', gallery_slug=gallery.slug) }}" class="btn btn-secondary">Cancel</a>
+            {% endif %}
+        </form>
+    </div>
 {% endblock %}

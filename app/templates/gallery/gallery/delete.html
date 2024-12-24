@@ -4,7 +4,7 @@
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{ url_for('gallery.index') }}">Home</a></li>
-            <li class="breadcrumb-item"><a href="{{ url_for('gallery.r_gallery', gallery_id=gallery.id) }}">{{ gallery.name }}</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('gallery.r_gallery', gallery_slug=gallery.slug) }}">{{ gallery.name }}</a></li>
             <li class="breadcrumb-item active" aria-current="page">Delete</li>
         </ol>
     </nav>
@@ -12,6 +12,6 @@
     <form method="post">
         <p>Are you sure you want to delete the gallery <strong>"{{ gallery.name }}"</strong>?</p>
         <button type="submit" class="btn btn-danger">Delete</button>
-        <a href="{{ url_for('gallery.r_gallery', gallery_id=gallery.id) }}" class="btn btn-secondary">Cancel</a>
+        <a href="{{ url_for('gallery.r_gallery', gallery_slug=gallery.slug) }}" class="btn btn-secondary">Cancel</a>
     </form>
 {% endblock %}
