@@ -4,9 +4,11 @@ Gallery routes
 from flask import Blueprint, render_template, flash, redirect, url_for, request, abort
 from flask_login import login_required  # type: ignore
 from slugify import slugify  # type: ignore
+from werkzeug.utils import secure_filename
 from app.extensions import db
 from app.forms.album_form import AlbumForm
 from app.forms.gallery_form import GalleryForm
+from app.forms.image_form import ImageForm
 from app.models.album import Album
 from app.models.gallery import Gallery
 
@@ -358,7 +360,52 @@ def c_image(gallery_slug, album_slug):
 
     :return: new image form
     """
-    return f'New image in gallery {gallery_slug}, album {album_slug}'
+    album = Album.get_album_by_slug(album_slug)  # get album
+    gallery = Gallery.get_gallery_by_slug(gallery_slug)  # get gallery
+
+    if (  # if...
+            album is None or  # ...album is None
+            gallery is None or  # ...gallery is None
+            album.gallery_id != gallery.id  # ...album does not belong to gallery
+    ):
+        abort(404)  # abort 404
+
+    form = ImageForm()  # create form instance
+
+    if form.validate_on_submit():  # if form is submitted
+
+        filename = secure_filename(form.image.data.filename)  # secure filename
+        form.image.data.save(f'app/static/images/{filename}')  # save image
+
+        image = Image(  # create image
+            file_name=filename,  # file name
+            caption=form.caption.data,  # caption
+            album_id=album.id  # album id
+        )
+
+        db.session.add(image)  # add image
+        db.session.commit()  # commit changes
+
+        flash(  # flash message
+            'Image created',
+            'success'
+        )
+
+        return redirect(  # redirect to album
+            url_for(
+                'gallery.r_album',
+                gallery_slug=gallery_slug,
+                album_slug=album_slug
+            )
+        )
+
+    return render_template(  # render new image form
+        'gallery/image/form.html',  # template
+        gallery=gallery,  # gallery
+        album=album,  # album
+        form=form,  # form
+        title='New Image'  # title
+    )
 
 
 @bp.route('/<gallery_slug>/<album_slug>/<file_name>')
