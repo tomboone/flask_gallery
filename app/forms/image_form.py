@@ -3,8 +3,8 @@ Image form
 """
 from flask_wtf import FlaskForm  # type:ignore
 from flask_wtf.file import FileAllowed, FileRequired  # type:ignore
-from wtforms import FileField, StringField
-from wtforms.validators import DataRequired
+from wtforms import FileField, StringField  # type:ignore
+from wtforms.validators import DataRequired  # type:ignore
 
 
 class ImageForm(FlaskForm):
