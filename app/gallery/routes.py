@@ -11,6 +11,7 @@ from app.forms.gallery_form import GalleryForm
 from app.forms.image_form import ImageForm
 from app.models.album import Album
 from app.models.gallery import Gallery
+from app.models.image import Image
 
 bp = Blueprint('gallery', __name__)
 
