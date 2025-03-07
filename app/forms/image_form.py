@@ -1,8 +1,8 @@
 """
 Image form
 """
-from flask_wtf import FlaskForm
-from flask_wtf.file import FileAllowed, FileRequired
+from flask_wtf import FlaskForm  # type:ignore
+from flask_wtf.file import FileAllowed, FileRequired  # type:ignore
 from wtforms import FileField, StringField
 from wtforms.validators import DataRequired
 
